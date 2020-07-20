@@ -19,9 +19,23 @@ namespace TechJobsPersistent.Models
         {
         }
 
-        public Job(string name)
+        public Job(string name, int employerId)
         {
             Name = name;
+            EmployerId = employerId;
         }
+
+        //public override bool Equals(object obj)
+        //{
+        //    return obj is Job job &&
+        //           Id == job.Id;
+        //}
+
+        //public override int GetHashCode()
+        //{
+        //    return HashCode.Combine(Id);
+        //}
+
+
     }
 }

@@ -25,18 +25,73 @@ namespace TechJobsPersistent.Controllers
         public IActionResult Index()
         {
             List<Job> jobs = context.Jobs.Include(j => j.Employer).ToList();
-
-            return View(jobs);
-        }
-
-        [HttpGet("/Add")]
-        public IActionResult AddJob()
-        {
+            if(jobs.Count > 0)
+            {
+                return View(jobs);
+            }
             return View();
         }
 
-        public IActionResult ProcessAddJobForm()
+        [HttpGet]
+        public IActionResult AddJob()
         {
+            List<Skill> skills = context.Skills.ToList();
+            List<Employer> employers = context.Employers.ToList();
+            AddJobViewModel viewModel = new AddJobViewModel(employers, skills);
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public IActionResult AddJob(AddJobViewModel viewModel, string[] selectedSkills)
+        {
+            if (ModelState.IsValid)
+            {
+
+                Job job = new Job
+                {
+                    Name = viewModel.Name,
+                    EmployerId = viewModel.EmployerId
+                };
+
+                List<Job> jobs = context.Jobs.ToList();
+
+                List<int> jobIds = new List<int>();
+
+                int jobId;
+                if (jobs.Count == 0)
+                {
+                    jobId = 1;
+                }
+
+                else
+                {
+                    foreach (Job j in jobs)
+                    {
+                        jobIds.Add(j.Id);
+                    }
+
+                    int maxId = jobIds.Max();
+                    jobId = maxId + 1;
+                }
+
+                foreach (string skill in selectedSkills)
+                {
+                    int skillId = int.Parse(skill);
+
+                    JobSkill jobSkill = new JobSkill
+                    {
+                        JobId = jobId,
+                        SkillId = skillId
+                    };
+                    
+                    context.JobSkills.Add(jobSkill);
+                }
+
+                context.Jobs.Add(job);               
+                context.SaveChanges();
+                return Redirect("/");
+
+            }
             return View();
         }
 
